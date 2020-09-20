@@ -7,4 +7,5 @@ export default interface ICreateProductsDTO {
   products: IListProductsDTO[];
   ip: string;
   fullDate: number;
+  cacheData?: any;
 }

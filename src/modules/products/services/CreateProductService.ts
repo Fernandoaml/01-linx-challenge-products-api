@@ -2,7 +2,6 @@ import { injectable, inject } from 'tsyringe';
 
 import ICreateProductsDTO from '@modules/products/dtos/ICreateProductsDTO';
 import ICacheProvider from '@shared/container/providers/CacheProvider/models/ICacheProvider';
-// import AppError from '@shared/errors/AppErrors';
 
 @injectable()
 class CreateProductService {

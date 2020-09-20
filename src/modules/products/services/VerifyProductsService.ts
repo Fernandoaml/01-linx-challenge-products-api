@@ -2,9 +2,10 @@ import { injectable, inject, container } from 'tsyringe';
 import { differenceInMinutes } from 'date-fns';
 
 import ICreateProductsDTO from '@modules/products/dtos/ICreateProductsDTO';
-import ISearchedData from '@modules/products/dtos/ISearchedData';
 import ICacheProvider from '@shared/container/providers/CacheProvider/models/ICacheProvider';
 import CreateProductService from '@modules/products/services/CreateProductService';
+import CreateProductCacheService from '@modules/products/services/CreateProductCacheService';
+import AppError from '@shared/errors/AppErrors';
 
 @injectable()
 class VerifyProductsService {
@@ -18,59 +19,73 @@ class VerifyProductsService {
     ip,
     products,
   }: ICreateProductsDTO): Promise<void> {
+    const compareInternalData: any[] = [];
+    const internalDataIndex: any[] = [];
+    const compareNewData: any[] = [];
     const createProductService = container.resolve(CreateProductService);
-    const verifyData: ISearchedData[] = [];
+    const createProductCacheService = container.resolve(
+      CreateProductCacheService,
+    );
+
     const cacheData = await this.cacheProvider.recover<ICreateProductsDTO[]>(
       `Products-List:${ip}`,
     );
 
     if (!cacheData) {
-      console.log('Os Dados do produto foram salvos no Redis.');
       const newProduct = { products, fullDate, ip };
       createProductService.execute(newProduct);
     }
 
     if (cacheData) {
-      cacheData.map((data, index) => {
-        const isSameData =
-          JSON.stringify(products) === JSON.stringify(data.products);
-        const momentHour = Date.now();
-        const minutes = differenceInMinutes(momentHour, data.fullDate);
-
-        if (isSameData) {
-          if (minutes < 10) {
-            return verifyData.push({
-              hasValue: true,
-              index,
-              isNew: false,
-              values: data,
+      cacheData.forEach((data, index) => {
+        internalDataIndex.push(index);
+        cacheData.forEach(compare => {
+          compareInternalData.push(
+            JSON.stringify(data.products) === JSON.stringify(compare.products),
+          );
+        });
+        compareNewData.push(
+          JSON.stringify(products) === JSON.stringify(data.products),
+        );
+      });
+      cacheData.forEach(
+        async (data, position): Promise<void> => {
+          const momentHour = Date.now();
+          const minutes = differenceInMinutes(momentHour, data.fullDate);
+          if (compareInternalData.indexOf(true) !== -1) {
+            if (minutes < 1) {
+              return;
+            }
+            cacheData.splice(internalDataIndex[position], 1);
+            cacheData.push({
+              products: data.products,
+              fullDate: momentHour,
+              ip: data.ip,
+            });
+            createProductCacheService.execute({
+              products: data.products,
+              fullDate: momentHour,
+              ip: data.ip,
+              cacheData,
             });
           }
-          // cacheData.splice(index);
-          return verifyData.push({
-            hasValue: false,
-            index,
-            isNew: false,
-            values: data,
-          });
-        }
-        return verifyData.push({
-          hasValue: false,
-          index,
-          isNew: true,
-          values: data,
+        },
+      );
+      if (compareNewData.indexOf(true) === -1) {
+        cacheData.push({ products, fullDate, ip });
+        createProductCacheService.execute({
+          products,
+          fullDate,
+          ip,
+          cacheData,
         });
-      });
+        return;
+      }
+      throw new AppError(
+        'You has creating too many requests with the same data.',
+        429,
+      );
     }
-
-    // console.log(verifyData);
-    // const createProductReturn = createProductService.execute(verifyData);
-
-    // if (verifyData[0] === false) {
-    //   cacheData.push({ products, fullDate, ip });
-    //   await this.cacheProvider.save(`Products-List:${ip}`, cacheData);
-    // }
-    // console.log(cacheData);
   }
 }
 

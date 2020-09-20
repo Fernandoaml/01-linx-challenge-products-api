@@ -1,7 +1,7 @@
-import { injectable, inject, container } from 'tsyringe';
+import { injectable, inject } from 'tsyringe';
 
 import ICacheProvider from '@shared/container/providers/CacheProvider/models/ICacheProvider';
-import ISearchedData from '../dtos/ISearchedData';
+import ICreateProductsDTO from '../dtos/ICreateProductsDTO';
 
 @injectable()
 class CreateProductCacheService {
@@ -10,12 +10,9 @@ class CreateProductCacheService {
     private cacheProvider: ICacheProvider,
   ) {}
 
-  public async execute({
-    hasValue,
-    index,
-    isNew,
-    values,
-  }: ISearchedData): Promise<void> {}
+  public async execute(data: ICreateProductsDTO): Promise<void> {
+    await this.cacheProvider.save(`Products-List:${data.ip}`, data.cacheData);
+  }
 }
 
 export default CreateProductCacheService;
