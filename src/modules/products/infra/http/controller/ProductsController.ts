@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import 'express-async-errors';
 import { container } from 'tsyringe';
 import { classToClass } from 'class-transformer';
 

@@ -1,4 +1,5 @@
-import { injectable, inject, container } from 'tsyringe';
+import 'reflect-metadata';
+import { injectable, inject } from 'tsyringe';
 import { differenceInMinutes } from 'date-fns';
 
 import ICreateProductsDTO from '@modules/products/dtos/ICreateProductsDTO';
@@ -19,13 +20,14 @@ class VerifyProductsService {
     ip,
     products,
   }: ICreateProductsDTO): Promise<void> {
+    const createProductCacheService = new CreateProductCacheService(
+      this.cacheProvider,
+    );
+    const createProductService = new CreateProductService(this.cacheProvider);
+
     const compareInternalData: any[] = [];
     const internalDataIndex: any[] = [];
     const compareNewData: any[] = [];
-    const createProductService = container.resolve(CreateProductService);
-    const createProductCacheService = container.resolve(
-      CreateProductCacheService,
-    );
 
     const cacheData = await this.cacheProvider.recover<ICreateProductsDTO[]>(
       `Products-List:${ip}`,
@@ -33,7 +35,7 @@ class VerifyProductsService {
 
     if (!cacheData) {
       const newProduct = { products, fullDate, ip };
-      createProductService.execute(newProduct);
+      await createProductService.execute(newProduct);
     }
 
     if (cacheData) {
@@ -48,12 +50,14 @@ class VerifyProductsService {
           JSON.stringify(products) === JSON.stringify(data.products),
         );
       });
+      let sendError = false;
       cacheData.forEach(
         async (data, position): Promise<void> => {
           const momentHour = Date.now();
           const minutes = differenceInMinutes(momentHour, data.fullDate);
           if (compareInternalData.indexOf(true) !== -1) {
             if (minutes < 1) {
+              sendError = true;
               return;
             }
             cacheData.splice(internalDataIndex[position], 1);
@@ -79,12 +83,13 @@ class VerifyProductsService {
           ip,
           cacheData,
         });
-        return;
       }
-      throw new AppError(
-        'You has creating too many requests with the same data.',
-        429,
-      );
+      if (sendError) {
+        throw new AppError(
+          'You has creating too many requests with the same data.',
+          429,
+        );
+      }
     }
   }
 }
