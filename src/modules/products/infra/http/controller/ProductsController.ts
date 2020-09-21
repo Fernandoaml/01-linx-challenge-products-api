@@ -5,7 +5,6 @@ import { classToClass } from 'class-transformer';
 
 import ICreateProductsDTO from '@modules/products/dtos/ICreateProductsDTO';
 import VerifyProductsService from '@modules/products/services/VerifyProductsService';
-import AppError from '@shared/errors/AppErrors';
 
 export default class UsersController {
   public async create(request: Request, response: Response): Promise<Response> {
