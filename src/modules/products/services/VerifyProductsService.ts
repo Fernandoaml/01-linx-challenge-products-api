@@ -19,7 +19,7 @@ class VerifyProductsService {
     fullDate,
     ip,
     products,
-  }: ICreateProductsDTO): Promise<void> {
+  }: ICreateProductsDTO): Promise<ICreateProductsDTO> {
     const createProductCacheService = new CreateProductCacheService(
       this.cacheProvider,
     );
@@ -36,61 +36,65 @@ class VerifyProductsService {
     if (!cacheData) {
       const newProduct = { products, fullDate, ip };
       await createProductService.execute(newProduct);
+      return newProduct;
     }
-
-    if (cacheData) {
-      cacheData.forEach((data, index) => {
-        internalDataIndex.push(index);
-        cacheData.forEach(compare => {
-          compareInternalData.push(
-            JSON.stringify(data.products) === JSON.stringify(compare.products),
-          );
-        });
-        compareNewData.push(
-          JSON.stringify(products) === JSON.stringify(data.products),
+    cacheData.forEach((data, index) => {
+      internalDataIndex.push(index);
+      cacheData.forEach(compare => {
+        compareInternalData.push(
+          JSON.stringify(data.products) === JSON.stringify(compare.products),
         );
       });
-      let sendError = false;
-      cacheData.forEach(
-        async (data, position): Promise<void> => {
-          const momentHour = Date.now();
-          const minutes = differenceInMinutes(momentHour, data.fullDate);
-          if (compareInternalData.indexOf(true) !== -1) {
-            if (minutes < 1) {
-              sendError = true;
-              return;
-            }
-            cacheData.splice(internalDataIndex[position], 1);
-            cacheData.push({
-              products: data.products,
-              fullDate: momentHour,
-              ip: data.ip,
-            });
-            createProductCacheService.execute({
-              products: data.products,
-              fullDate: momentHour,
-              ip: data.ip,
-              cacheData,
-            });
-          }
-        },
+      compareNewData.push(
+        JSON.stringify(products) === JSON.stringify(data.products),
       );
-      if (compareNewData.indexOf(true) === -1) {
-        cacheData.push({ products, fullDate, ip });
-        createProductCacheService.execute({
-          products,
-          fullDate,
-          ip,
-          cacheData,
-        });
-      }
-      if (sendError) {
-        throw new AppError(
-          'You has creating too many requests with the same data.',
-          429,
+    });
+    if (compareInternalData.indexOf(true) !== -1) {
+      const list: any = [];
+      internalDataIndex.forEach(index => {
+        list.push(
+          JSON.stringify(products) ===
+            JSON.stringify(cacheData[index].products),
         );
+      });
+      if (list.indexOf(true) !== -1) {
+        if (
+          differenceInMinutes(
+            fullDate,
+            cacheData[list.indexOf(true)].fullDate,
+          ) < 10
+        ) {
+          throw new AppError('Too many requests with the same data.', 429);
+        } else if (
+          differenceInMinutes(
+            fullDate,
+            cacheData[list.indexOf(true)].fullDate,
+          ) >= 10
+        ) {
+          cacheData.splice(list.indexOf(true), 1);
+          cacheData.push({
+            products,
+            fullDate,
+            ip,
+          });
+          createProductCacheService.execute({
+            products,
+            fullDate,
+            ip,
+            cacheData,
+          });
+          return { products, fullDate, ip };
+        }
       }
     }
+    cacheData.push({ products, fullDate, ip });
+    createProductCacheService.execute({
+      products,
+      fullDate,
+      ip,
+      cacheData,
+    });
+    return { products, fullDate, ip };
   }
 }
 

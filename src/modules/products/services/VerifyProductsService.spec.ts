@@ -66,7 +66,7 @@ describe('CreateProductCache', () => {
     expect(productCache[1].fullDate).toBe(timeNow);
   });
 
-  it('Should not be able to create a same product on a flood communication', async () => {
+  it('Should not be able to create a same product on a flood communication. It should be return true value', async () => {
     const timeNow = Date.now();
 
     await verifyProducts.execute({

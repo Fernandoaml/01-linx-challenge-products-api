@@ -5,18 +5,19 @@ import { classToClass } from 'class-transformer';
 
 import ICreateProductsDTO from '@modules/products/dtos/ICreateProductsDTO';
 import VerifyProductsService from '@modules/products/services/VerifyProductsService';
+import AppError from '@shared/errors/AppErrors';
 
 export default class UsersController {
   public async create(request: Request, response: Response): Promise<Response> {
     const { ip } = request;
-    const data = {
+    const product = {
       products: request.body,
       ip,
       fullDate: Date.now(),
     } as ICreateProductsDTO;
 
     const verifyTheRequestService = container.resolve(VerifyProductsService);
-    await verifyTheRequestService.execute(data);
-    return response.json(classToClass(request.body));
+    const data = await verifyTheRequestService.execute(product);
+    return response.json(classToClass(data));
   }
 }
