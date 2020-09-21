@@ -2,8 +2,8 @@
   "swagger": "2.0",
   "info": {
     "version": "1.0.0",
-    "title": "BTG_Pactual_Back_End Swagger API",
-    "description": "some information about my BTG back end...",
+    "title": "01 - Linx Challenge Products API",
+    "description": "some information about my Linx back end...",
     "license": {
       "name": "MIT",
       "url": "https://opensource.org/licenses/MIT"
@@ -14,7 +14,7 @@
   "tags": [
     {
       "name": "Repositories",
-      "description": "Challenger to create a REST service with two topics."
+      "description": "https://github.com/Fernandoaml/01-linx-challenge-products-api"
     }
   ],
   "schemes": [
