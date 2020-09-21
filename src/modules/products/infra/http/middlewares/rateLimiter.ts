@@ -1,11 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import redis from 'redis';
 import { RateLimiterRedis } from 'rate-limiter-flexible';
+import 'dotenv';
 
 import AppError from '@shared/errors/AppErrors';
 
 const redisClient = redis.createClient({
-  host: '127.0.0.1',
+  host: process.env.HOST_IP,
   port: 6379,
   enable_offline_queue: false,
 });

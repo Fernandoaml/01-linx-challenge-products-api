@@ -1,4 +1,5 @@
 import { RedisOptions } from 'ioredis';
+import 'dotenv';
 
 interface ICacheConfig {
   driver: 'redis';
@@ -8,12 +9,12 @@ interface ICacheConfig {
 }
 
 export default {
-  driver: 'redis',
+  driver: process.env.DRIVER_NAME,
   config: {
     redis: {
-      host: '127.0.0.1',
-      port: 6379,
-      password: undefined,
+      host: process.env.HOST_IP,
+      port: process.env.HOST_PORT,
+      password: process.env.HOST_PASSWORD,
     },
   },
 } as ICacheConfig;
