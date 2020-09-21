@@ -49,6 +49,7 @@ The created API, it should be able to create a new product. The Api need verify 
 
 * The back-end is ready to be exported to a any version of JavaScript. Was used TypeScript and React to resolve the scarcity of developers with knowledge of leged versions.
 * The persistence of data are ready to grow up or be change. Today we use Redis to Cache data, but it's ready to accept any other.
+* The project is ready to be scaled. applying many type of solutions to that. At choice of project.
 
 #### S.O.L.I.D principles / DDD and TDD.
 
@@ -85,4 +86,25 @@ I applied the DDD \(Domain-Driven Design\), segmented through knowledge area \(m
    3. You need rename the \(**.env copy**\) file to **.env** 
       1. And don't need to change anything.
 5. **After run: yarn dev:server**
+
+## **Tests:**
+
+* **Back End:**
+  * To Back end i used the JEST to make the TDD aplying unity tests
+  * If you're with command line opened, you must open a new interface of command line in the same folder and run the next command.
+    * **yarn test**
+
+![](.gitbook/assets/jest.png)
+
+*  **To see the coverage report \(Lcov-report\) you need to open the following file**:
+  * \01-linx-challenge-products-api\coverage\lcov-report\index.html
+
+![](.gitbook/assets/lcov.png)
+
+## API - Swagger UI
+
+* after of initialization of back-end. You will can access the Swagger page, to see the description of the API REST of LabQuality. The page as exemplification, as shown in the image below.
+  * [http://localhost:3333/swagger/](http://localhost:3333/swagger/)
+
+![](.gitbook/assets/s.png)
 
