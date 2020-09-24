@@ -103,7 +103,7 @@ I applied the DDD \(Domain-Driven Design\), segmented through knowledge area \(m
 
 ## API - Swagger UI
 
-* after of initialization of back-end. You will can access the Swagger page, to see the description of the API REST of LabQuality. The page as exemplification, as shown in the image below.
+* after of initialization of back-end. You will can access the Swagger page, to see the description of the API REST of 01-linx-challenge-products-api. The page as exemplification, as shown in the image below.
   * [http://localhost:3333/swagger/](http://localhost:3333/swagger/)
 
 ![](.gitbook/assets/s.png)
